@@ -3,62 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSV to Google Sheets</title>
+    <title>Voter List Sync</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 flex items-center justify-center min-h-screen p-4">
-    <div class="bg-white shadow-xl rounded-2xl p-8 max-w-2xl w-full border border-gray-100">
-        <h1 class="text-2xl font-bold text-gray-800 mb-4 text-center">Update Google Spreadsheet</h1>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-6">
+    <div class="max-w-3xl w-full bg-white rounded-3xl shadow-2xl p-8 border border-gray-200">
+        <div class="flex items-center gap-3 mb-6">
+            <div class="bg-green-100 p-3 rounded-full text-green-600 font-bold text-xl">📊</div>
+            <h1 class="text-2xl font-black text-gray-800 tracking-tight">Voter Data Sync</h1>
+        </div>
+
+        <p class="text-gray-500 mb-4 text-sm font-medium">Paste your CSV data from Gemini below:</p>
         
-        <textarea id="csvInput" 
-            class="w-full h-72 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono text-sm mb-4" 
-            placeholder="Paste your data here..."></textarea>
-        
-        <button id="submitBtn" onclick="sendData()" 
-            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2">
+        <textarea id="csvBox" class="w-full h-80 p-5 bg-gray-50 border-2 border-gray-200 rounded-2xl focus:border-green-500 focus:ring-0 transition-all font-mono text-xs text-gray-700 mb-6" placeholder="Serial No,Name,Guardian Name..."></textarea>
+
+        <button id="syncBtn" onclick="sendToSheets()" class="w-full bg-green-600 hover:bg-green-700 text-white font-black py-4 rounded-2xl shadow-lg shadow-green-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2 uppercase tracking-wider">
             Push to Google Sheets
         </button>
-        
-        <div id="status" class="mt-4 text-center text-sm font-semibold"></div>
+
+        <div id="status" class="mt-6 text-center font-bold text-sm"></div>
     </div>
 
     <script>
-        async function sendData() {
-            const input = document.getElementById('csvInput').value;
-            const btn = document.getElementById('submitBtn');
+        async function sendToSheets() {
+            const btn = document.getElementById('syncBtn');
             const status = document.getElementById('status');
+            const csv = document.getElementById('csvBox').value;
 
-            if (!input.trim()) {
-                status.innerText = "❌ Please paste some data first.";
-                status.className = "mt-4 text-center text-red-500 font-semibold";
-                return;
-            }
+            if (!csv.trim()) return alert("Please paste the data first!");
 
             btn.disabled = true;
-            btn.innerText = "Sending...";
-            status.innerText = "Processing...";
+            btn.innerHTML = "Processing...";
+            status.innerText = "⏳ Connecting to Google Cloud...";
+            status.className = "mt-6 text-center font-bold text-sm text-gray-500";
 
             try {
                 const response = await fetch('/api/update-sheet', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ csvData: input })
+                    body: JSON.stringify({ csvData: csv })
                 });
 
-                const data = await response.json();
+                const result = await response.json();
 
                 if (response.ok) {
-                    status.innerHTML = `✅ Success! <a href="https://docs.google.com/spreadsheets/d/1gLxTk9bfXxP5jnvo73ua7S4VdABDV7-gA-011-W15wk/" target="_blank" class="text-blue-600 underline">Open Sheet</a>`;
-                    status.className = "mt-4 text-center text-green-600 font-semibold";
+                    status.innerHTML = `✅ SYNC COMPLETE! <a href="https://docs.google.com/spreadsheets/d/1gLxTk9bfXxP5jnvo73ua7S4VdABDV7-gA-011-W15wk/" target="_blank" class="text-blue-600 underline ml-2">Open Sheet</a>`;
+                    status.className = "mt-6 text-center font-bold text-sm text-green-600 uppercase";
+                    document.getElementById('csvBox').value = ""; // Clear box on success
                 } else {
-                    status.innerText = "❌ " + data.error;
-                    status.className = "mt-4 text-center text-red-600 font-semibold";
+                    throw new Error(result.error);
                 }
             } catch (err) {
-                status.innerText = "❌ Network Error. Check Vercel Logs.";
+                status.innerText = "❌ ERROR: " + err.message;
+                status.className = "mt-6 text-center font-bold text-sm text-red-600";
             } finally {
                 btn.disabled = false;
-                btn.innerText = "Push to Google Sheets";
+                btn.innerHTML = "Push to Google Sheets";
             }
         }
     </script>
