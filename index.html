@@ -1,95 +1,73 @@
-
-Conversation with Gemini
-You said
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta charset="UTF-8">
+<title>CSV to Excel (.xlsx) Converter</title>
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
 
-    <title>CSV to Excel (.xlsx) Converter</title>
-
-    <!-- Load SheetJS for Excel conversion -->
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-    <script src="https://cdn.tailwindcss.com"></script>
+<!-- SheetJS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 </head>
 
-<body class="bg-gray-100 flex items-center justify-center h-screen p-4">
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
-    <div class="bg-white rounded-xl shadow-lg p-8 max-w-2xl w-full text-center">
+<div class="bg-white shadow-lg rounded-xl p-8 w-full max-w-2xl text-center">
 
-        <svg class="w-16 h-16 mx-auto mb-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+<h1 class="text-2xl font-bold text-gray-800 mb-2">
+Excel (.xlsx) Generator
+</h1>
 
-        <h2 class="text-2xl font-bold text-gray-800 mb-2">Excel (.xlsx) Generator</h2>
+<p class="text-gray-600 mb-6">
+Paste CSV data below and download it as an Excel file.
+</p>
 
-        <p class="text-gray-600 mb-6">Since direct downloads aren't working, copy the text from the previous file and paste it below to instantly get your Excel file.</p>
+<textarea
+id="csvInput"
+class="w-full h-64 p-4 border rounded-lg focus:ring-2 focus:ring-green-500 outline-none font-mono text-sm mb-4"
+placeholder="Paste CSV data here..."
+></textarea>
 
-       
+<button
+onclick="downloadExcel()"
+class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition"
+>
+Download Excel (.xlsx)
+</button>
 
-        <textarea id="csvInput" class="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none mb-4 font-mono text-sm whitespace-pre" placeholder="Paste all the data here..."></textarea>
+</div>
 
-       
+<script>
 
-        <button onclick="downloadExcel()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2">
+function downloadExcel() {
 
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+const csvText = document.getElementById("csvInput").value;
 
-            Download as Excel (.xlsx)
+if (!csvText.trim()) {
+alert("Please paste CSV data first.");
+return;
+}
 
-        </button>
+try {
 
-    </div>
+const workbook = XLSX.read(csvText, { type: "string" });
 
+XLSX.writeFile(workbook, "Voter_Data.xlsx");
 
+} catch (error) {
 
-    <script>
+console.error(error);
+alert("Error converting CSV. Please check your data.");
 
-        function downloadExcel() {
+}
 
-            const csvText = document.getElementById('csvInput').value;
+}
 
-            if (!csvText.trim()) {
-
-                alert("Please paste the data into the text box first!");
-
-                return;
-
-            }
-
-           
-
-            try {
-
-                // Read the pasted CSV string into a SheetJS workbook
-
-                const workbook = XLSX.read(csvText, {type: "string"});
-
-               
-
-                // Trigger the browser download of the Excel file
-
-                XLSX.writeFile(workbook, "Voter_Data.xlsx");
-
-            } catch (error) {
-
-                alert("An error occurred. Please ensure the text was pasted correctly.");
-
-                console.error(error);
-
-            }
-
-        }
-
-    </script>
+</script>
 
 </body>
-
 </html>
-
