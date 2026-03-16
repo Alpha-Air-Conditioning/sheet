@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sync to Google Sheets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 flex items-center justify-center h-screen p-4">
+    <div class="bg-white rounded-xl shadow-2xl p-8 max-w-2xl w-full text-center border border-slate-200">
+        <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">Google Sheets Sync</h2>
+        <p class="text-gray-500 mb-6">Paste your CSV data below to update the live spreadsheet.</p>
+        
+        <textarea id="csvInput" class="w-full h-64 p-4 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:outline-none mb-4 font-mono text-sm" placeholder="Paste data here..."></textarea>
+        
+        <button id="syncBtn" onclick="syncData()" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition flex items-center justify-center gap-2">
+            Update Spreadsheet Now
+        </button>
+        <p id="status" class="mt-4 text-sm font-medium"></p>
+    </div>
+
+    <script>
+        async function syncData() {
+            const csvText = document.getElementById('csvInput').value;
+            const btn = document.getElementById('syncBtn');
+            const status = document.getElementById('status');
+
+            if (!csvText.trim()) {
+                alert("Please paste data first!");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Syncing...";
+            status.innerText = "Sending to Google Sheets...";
+
+            try {
+                const response = await fetch('/api/update-sheet', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ csvData: csvText })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    status.innerHTML = `<span class="text-green-600">Successfully Updated!</span> <a href="https://docs.google.com/spreadsheets/d/1gLxTk9bfXxP5jnvo73ua7S4VdABDV7-gA-011-W15wk/" target="_blank" class="underline ml-2 text-blue-500">View Sheet</a>`;
+                } else {
+                    status.innerText = "Error: " + result.error;
+                }
+            } catch (err) {
+                status.innerText = "Network Error. Check console.";
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Update Spreadsheet Now";
+            }
+        }
+    </script>
+</body>
+</html>
