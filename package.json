@@ -1,7 +1,6 @@
 {
-  "name": "csv-to-google-sheets",
+  "name": "voter-data-sync",
   "version": "1.0.0",
-  "main": "api/update-sheet.js",
   "dependencies": {
     "googleapis": "^126.0.0"
   }
